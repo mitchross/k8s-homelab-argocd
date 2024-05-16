@@ -1,0 +1,11 @@
+{
+    "title": "stringreplacement",
+    "category": "SECURE_NOTE",
+    "sections": [],
+    "fields": [
+      { "type": "STRING", "label": "domain", "value": ""},
+      { "type": "STRING", "label": "ciliumipamcidr", "value": ""},
+      { "type": "STRING", "label": "cloudflaretunnelid", "value": ""}
+    ]
+   }
+   
