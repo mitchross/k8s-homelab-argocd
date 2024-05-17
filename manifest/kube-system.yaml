@@ -59,7 +59,7 @@ spec:
           bbr: false
         bpf:
           masquerade: true
-          hostLegacyRouting: true
+          hostLegacyRouting: false
         cluster:
           name: home-cluster
           id: 1
