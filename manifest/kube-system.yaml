@@ -50,7 +50,7 @@ spec:
   source:
     chart: cilium
     repoURL: https://helm.cilium.io/
-    targetRevision: 1.15.5
+    targetRevision: 1.16.0-pre.2
     helm:
       valuesObject:
         autoDirectNodeRoutes: true
@@ -103,11 +103,11 @@ spec:
         localRedirectPolicy: true
         image:
           #testing https://github.com/cilium/cilium/issues/20942
-          override: "quay.io/cilium/cilium-ci:e14988e02ce8d0f3451b177a4f97a3833df65ab3"
+          override: "quay.io/cilium/cilium:v1.16.0-pre.2"
         operator:
           #testing https://github.com/cilium/cilium/issues/20942
           image:
-            override: "quay.io/cilium/operator-generic-ci:e14988e02ce8d0f3451b177a4f97a3833df65ab3"
+            override: "quay.io/cilium/operator-generic:v1.15.5@sha256:f5d3d19754074ca052be6aac5d1ffb1de1eb5f2d947222b5f10f6d97ad4383e8"
           replicas: 1
           rollOutPods: true
         rollOutCiliumPods: true
