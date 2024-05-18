@@ -50,12 +50,13 @@ spec:
   source:
     chart: cilium
     repoURL: https://helm.cilium.io/
-    targetRevision: 1.16.0-pre.2
+    targetRevision: 1.15.5
     helm:
       valuesObject:
         autoDirectNodeRoutes: true
         bandwidthManager:
           enabled: true
+          # rk1's run on 5.10 version of kernel, 5.12 is required
           bbr: false
         bpf:
           masquerade: true
@@ -66,7 +67,7 @@ spec:
         containerRuntime:
           integration: containerd
           socketPath: /var/run/k3s/containerd/containerd.sock
-        enableRuntimeDeviceDetection: true
+        #enableRuntimeDeviceDetection: true
         endpointRoutes:
           enabled: true
         hubble:
@@ -101,6 +102,13 @@ spec:
           algorithm: maglev
           mode: dsr
         localRedirectPolicy: true
+        image:
+          #testing https://github.com/cilium/cilium/issues/20942
+          override: "quay.io/cilium/cilium-ci:e14988e02ce8d0f3451b177a4f97a3833df65ab3"
+        operator:
+          #testing https://github.com/cilium/cilium/issues/20942
+          image:
+            override: "quay.io/cilium/operator-generic-ci:e14988e02ce8d0f3451b177a4f97a3833df65ab3"
           replicas: 1
           rollOutPods: true
         rollOutCiliumPods: true
@@ -338,8 +346,8 @@ metadata:
   name: pool
 spec:
   cidrs:
-    - start: "192.168.10.110"
-      stop: "192.168.10.150"
+    - start: "192.168.10.101"
+      stop: "192.168.10.130"
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
