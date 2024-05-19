@@ -162,14 +162,14 @@ kubectl create secret generic 1passwordconnect --namespace external-secrets --fr
 
 ## argocd
 ```bash
-export argocd_applicationyaml=$(curl -sL "https://raw.githubusercontent.com/mitchross/argocd-homelab/main/manifest/argocd.yaml" | yq eval-all '. | select(.metadata.name == "argocd" and .kind == "Application")' -)
+export argocd_applicationyaml=$(curl -sL "https://raw.githubusercontent.com/mitchross/k8s-homelab-argo/main/manifest/argocd.yaml" | yq eval-all '. | select(.metadata.name == "argocd" and .kind == "Application")' -)
 export argocd_name=$(echo "$argocd_applicationyaml" | yq eval '.metadata.name' -)
 export argocd_chart=$(echo "$argocd_applicationyaml" | yq eval '.spec.source.chart' -)
 export argocd_repo=$(echo "$argocd_applicationyaml" | yq eval '.spec.source.repoURL' -)
 export argocd_namespace=$(echo "$argocd_applicationyaml" | yq eval '.spec.destination.namespace' -)
 export argocd_version=$(echo "$argocd_applicationyaml" | yq eval '.spec.source.targetRevision' -)
 export argocd_values=$(echo "$argocd_applicationyaml" | yq eval '.spec.source.helm.valuesObject' - | yq eval 'del(.configs.cm)' -)
-export argocd_config=$(curl -sL "https://raw.githubusercontent.com/mitchross/argocd-homelab/main/manifest/argocd.yaml" | yq eval-all '. | select(.kind == "AppProject" or .kind == "ApplicationSet")' -)
+export argocd_config=$(curl -sL "https://raw.githubusercontent.com/mitchross/k8s-homelab-argo/main/manifest/argocd.yaml" | yq eval-all '. | select(.kind == "AppProject" or .kind == "ApplicationSet")' -)
 
 # install
 echo "$argocd_values" | helm template $argocd_name $argocd_chart --repo $argocd_repo --version $argocd_version --namespace $argocd_namespace --values - | kubectl apply --namespace $argocd_namespace --filename -
