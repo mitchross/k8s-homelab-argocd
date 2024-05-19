@@ -233,7 +233,7 @@ spec:
   goTemplate: true
   generators:
     - git:
-        repoURL: https://github.com/k8s-homelab-argocd/argocd-homelab.git
+        repoURL: https://github.com/mitchross/k8s-homelab-argocd.git
         revision: HEAD
         files:
           - path: manifest/*.yaml
@@ -243,7 +243,7 @@ spec:
     spec:
       project: homelab
       source:
-        repoURL: https://github.com/k8s-homelab-argocd/argocd-homelab.git
+        repoURL: https://github.com/mitchross/k8s-homelab-argocd.git
         path: '{{ .path.path }}'
         plugin:
           name: avp-directory-include
