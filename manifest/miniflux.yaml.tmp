@@ -1,3 +1,4 @@
+---
 kind: Namespace
 apiVersion: v1
 metadata:
@@ -18,14 +19,14 @@ spec:
   target:
     creationPolicy: Owner
   data:
-  - secretKey: postgrespassword
-    remoteRef:
-      key: postgres.cluster01.miniflux.owner
-      property: password
-  - secretKey: postgresuser
-    remoteRef:
-      key: postgres.cluster01.miniflux.owner
-      property: username
+    - secretKey: postgrespassword
+      remoteRef:
+        key: postgres.cluster01.miniflux.owner
+        property: password
+    - secretKey: postgresuser
+      remoteRef:
+        key: postgres.cluster01.miniflux.owner
+        property: username
 ---
 apiVersion: external-secrets.io/v1beta1
 kind: ExternalSecret
@@ -40,14 +41,14 @@ spec:
   target:
     creationPolicy: Owner
   data:
-  - secretKey: client_id
-    remoteRef:
-      key: sso
-      property: miniflux_client_id
-  - secretKey: client_secret
-    remoteRef:
-      key: sso
-      property: miniflux_client_secret
+    - secretKey: client_id
+      remoteRef:
+        key: sso
+        property: miniflux_client_id
+    - secretKey: client_secret
+      remoteRef:
+        key: sso
+        property: miniflux_client_secret
 ---
 apiVersion: v1
 kind: Service
@@ -61,10 +62,10 @@ metadata:
 spec:
   type: ClusterIP
   ports:
-  - port: 80
-    targetPort: 80
-    protocol: TCP
-    name: http
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+      name: http
   selector:
     app.kubernetes.io/instance: miniflux
     app.kubernetes.io/name: miniflux
@@ -86,62 +87,62 @@ spec:
       app.kubernetes.io/instance: miniflux
   template:
     metadata:
-      labels:
+      labels: 
         app.kubernetes.io/instance: miniflux
         app.kubernetes.io/name: miniflux
     spec:
-      containers:
-      - env:
-        - name: BASE_URL
-          value: https://rss.<path:stringreplacesecret#domain>
-        #- name: CREATE_ADMIN
-        #  value: "1"
-        - name: LOG_DATE_TIME
-          value: "1"
-        - name: METRICS_ALLOWED_NETWORKS
-          value: <path:stringreplacesecret#ciliumipamcidr>
-        - name: METRICS_COLLECTOR
-          value: "1"
-        - name: OAUTH2_CLIENT_ID
-          valueFrom:
-            secretKeyRef:
-              key: client_id
-              name: sso
-        - name: OAUTH2_CLIENT_SECRET
-          valueFrom:
-            secretKeyRef:
-              key: client_secret
-              name: sso
-        - name: OAUTH2_OIDC_DISCOVERY_ENDPOINT
-          value: https://auth.<path:stringreplacesecret#domain>/application/o/miniflux/
-        - name: OAUTH2_PROVIDER
-          value: oidc
-        - name: OAUTH2_REDIRECT_URL
-          value: https://rss.<path:stringreplacesecret#domain>/oauth2/oidc/callback
-        - name: OAUTH2_USER_CREATION
-          value: "1"
-        - name: POLLING_FREQUENCY
-          value: "15"
-        - name: POLLING_SCHEDULER
-          value: entry_frequency
-        - name: PORT
-          value: "80"
-        - name: RUN_MIGRATIONS
-          value: "1"
-        - name: HELPERVAR_POSTGRES_USER
-          valueFrom:
-            secretKeyRef:
-              key: postgresuser
-              name: miniflux-configsecrets
-        - name: HELPERVAR_POSTGRES_PASSWORD
-          valueFrom:
-            secretKeyRef:
-              key: postgrespassword
-              name: miniflux-configsecrets
-        - name: DATABASE_URL
-          value: "postgres://$(HELPERVAR_POSTGRES_USER):$(HELPERVAR_POSTGRES_PASSWORD)@cluster01.postgres/miniflux"
-        image: ghcr.io/miniflux/miniflux:2.1.3-distroless
-        name: main
+      containers: 
+        - env:
+          - name: BASE_URL
+            value: https://rss.<path:stringreplacesecret#domain>
+          #- name: CREATE_ADMIN
+          #  value: "1"
+          - name: LOG_DATE_TIME
+            value: "1"
+          # - name: METRICS_ALLOWED_NETWORKS
+          #   value: 192.168.1.100/32
+          # - name: METRICS_COLLECTOR
+          #   value: "1"
+          - name: OAUTH2_CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                key: client_id
+                name: sso
+          - name: OAUTH2_CLIENT_SECRET
+            valueFrom:
+              secretKeyRef:
+                key: client_secret
+                name: sso
+          - name: OAUTH2_OIDC_DISCOVERY_ENDPOINT
+            value: https://auth.<path:stringreplacesecret#domain>/application/o/miniflux/
+          - name: OAUTH2_PROVIDER
+            value: oidc
+          - name: OAUTH2_REDIRECT_URL
+            value: https://rss.<path:stringreplacesecret#domain>/oauth2/oidc/callback
+          - name: OAUTH2_USER_CREATION
+            value: "1"
+          - name: POLLING_FREQUENCY
+            value: "15"
+          - name: POLLING_SCHEDULER
+            value: entry_frequency
+          - name: PORT
+            value: "80"
+          - name: RUN_MIGRATIONS
+            value: "1"
+          - name: HELPERVAR_POSTGRES_USER
+            valueFrom:
+              secretKeyRef:
+                key: postgresuser
+                name: miniflux-configsecrets
+          - name: HELPERVAR_POSTGRES_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                key: postgrespassword
+                name: miniflux-configsecrets
+          - name: DATABASE_URL
+            value: "postgres://$(HELPERVAR_POSTGRES_USER):$(HELPERVAR_POSTGRES_PASSWORD)@cluster01.postgres/miniflux"
+          image: ghcr.io/miniflux/miniflux:2.1.3-distroless
+          name: main
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -151,16 +152,16 @@ metadata:
 spec:
   ingressClassName: ingress-nginx-internal
   rules:
-  - host: "rss.vanillax.xyz"
-    http:
-      paths:
-      - path: "/"
-        pathType: Prefix
-        backend:
-          service:
-            name: miniflux
-            port:
-              number: 80
+    - host: "rss.vanillax.me"
+      http:
+        paths:
+          - path: "/"
+            pathType: Prefix
+            backend:
+              service:
+                name: miniflux
+                port:
+                  number: 80
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
@@ -195,10 +196,10 @@ metadata:
     external-dns.custom/type: private
 spec:
   endpoints:
-  - dnsName: rss.<path:stringreplacesecret#domain>
-    recordType: CNAME
-    targets:
-    - ingress.<path:stringreplacesecret#domain>
-    # providerSpecific:
-    #   - name: external-dns.alpha.kubernetes.io/cloudflare-proxied
-    #     value: "false"
+    - dnsName: rss.<path:stringreplacesecret#domain>
+      recordType: CNAME
+      targets:
+        - ingress.<path:stringreplacesecret#domain>
+      # providerSpecific:
+      #   - name: external-dns.alpha.kubernetes.io/cloudflare-proxied
+      #     value: "false"

@@ -41,7 +41,7 @@ spec:
   source:
     chart: argo-cd
     repoURL: https://argoproj.github.io/argo-helm
-    targetRevision: 6.9.2
+    targetRevision: 6.11.1
     helm:
       valuesObject:
         configs:
@@ -233,7 +233,7 @@ spec:
   goTemplate: true
   generators:
     - git:
-        repoURL: https://github.com/k8s-homelab-argocd/argocd-homelab.git
+        repoURL: https://github.com/mitchross/k8s-homelab-argocd.git
         revision: HEAD
         files:
           - path: manifest/*.yaml
@@ -243,7 +243,7 @@ spec:
     spec:
       project: homelab
       source:
-        repoURL: https://github.com/k8s-homelab-argocd/argocd-homelab.git
+        repoURL: https://github.com/mitchross/k8s-homelab-argocd.git
         path: '{{ .path.path }}'
         plugin:
           name: avp-directory-include
@@ -367,6 +367,6 @@ spec:
 # type: Opaque
 # stringData:
 #   password: github_pat_xxxxxxxx
-#   url:  https://github.com/xxxxxxxx/argocd-homelab.git
+#   url:  https://github.com/xxxxxxxx/k8s-homelab-argocd.git
 #   username: xxxxxxxx
 #   type: git

@@ -1,0 +1,153 @@
+---
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: test-zone
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: echo
+  namespace: test-zone
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: echo
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: echo
+    spec:
+      containers:
+        - image: ealen/echo-server
+          imagePullPolicy: Always
+          name: echo
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: echo-service
+  namespace: test-zone
+spec:
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: echo
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: echo-http
+  namespace: test-zone
+  annotations:
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+spec:
+  ingressClassName: ingress-nginx-internal
+  rules:
+    - host: echo-internal.<path:stringreplacesecret#domain>
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: echo-service
+                port:
+                  number: 80
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: echo-route
+  namespace: test-zone
+spec:
+  parentRefs:
+  - name: internal
+    namespace: gateway
+    sectionName: https
+  hostnames:
+  - "echo-internal.<path:stringreplacesecret#domain>"
+  rules:
+  - backendRefs:
+    - name: echo-service
+      port: 80
+---
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
+metadata:
+  name: echo-internal
+  namespace: test-zone
+  annotations:
+    external-dns.custom/type: private
+spec:
+  endpoints:
+    - dnsName: echo-internal.<path:stringreplacesecret#domain>
+      recordType: CNAME
+      targets:
+        - intgw.<path:stringreplacesecret#domain>
+      providerSpecific:
+        - name: external-dns.alpha.kubernetes.io/cloudflare-proxied
+          value: "false"
+---
+## External
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: echo-http-external
+  namespace: test-zone
+  annotations:
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
+spec:
+  ingressClassName: ingress-nginx-internal
+  rules:
+    - host: echo-external2.<path:stringreplacesecret#domain>
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: echo-service
+                port:
+                  number: 80
+---
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: echo-route-external
+  namespace: test-zone
+spec:
+  parentRefs:
+  - name: external
+    namespace: gateway
+    sectionName: https
+  hostnames:
+  - "echo-external2.<path:stringreplacesecret#domain>"
+  rules:
+  - backendRefs:
+    - name: echo-service
+      port: 80
+---
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
+metadata:
+  name: echo-external
+  namespace: test-zone
+  annotations:
+    external-dns.custom/type: public
+spec:
+  endpoints:
+    - dnsName: echo-external2.<path:stringreplacesecret#domain>
+      recordType: CNAME
+      targets:
+        # - extgw.<path:stringreplacesecret#domain>
+          - ingress.<path:stringreplacesecret#domain>
+      # providerSpecific:
+      #   - name: external-dns.alpha.kubernetes.io/cloudflare-proxied
+      #     value: "false"
+---

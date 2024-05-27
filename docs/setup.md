@@ -1,8 +1,15 @@
-# Preperation
+# Required Purchases
 - 1Password
 - Cloudflare managed domain
-- reserved cidr block for broadcasting
 
+# Preperation
+
+## Update manifests
+k8s-homelab-argocd aims to be as agnostic as possible, however several configurations are implementation specific.  Be sure to review the settings related to infrastructure.
+- Review `manifest/kube-system.yaml`
+- Review `manifest/longhorn-system.yaml`
+- Review `manifest/gateway.yaml`
+- Update `docs/network.md`
 
 ## 1Password
 - Create vault named `homelab`
@@ -56,18 +63,18 @@ homelab                        # vault used for containing secrets
 ### String Replacement
 - In the homelab vault, create secret named `stringreplacesecret`
 - Save your domain mydomain.com into a key named `domain`. 
-- Save your cidr block for Cilium IPAM to manage into a key named `ciliumipamcidr`. 
+- Save your cidr block for Cilium IPAM to manage into a key named `ciliumipamcidr`. #will be sunsetting this soon
 - Save the above Cloudflare tunnel id into a key named `cloudflaretunnelid`.
 
 
-### Ryot Integrations
+### Ryot
 - In the homelab vault, create secret named `ryot`
 - Video game tracking requires access through Twitch to https://www.igdb.com/.  Follow docs to generate OAuth credentials.  Save clientid into key named `twitch_client_id` and clientsecret into key named `twitch_client_secret` 
 
 # Setup
 
 ## k3s
-This can be used with an existing Kubernetes cluster, however you may not want argocd to manage resources such as kube-system.  Either way I encourage creating your own fork or copy of this project and replacing any references to `k8s-homelab-argocd/argocd-homelab` with the copy/fork.
+This can be used with an existing Kubernetes cluster, however you may not want argocd to manage resources such as kube-system.  Either way I encourage creating your own fork or copy of this project and replacing any references to `mitchross/k8s-homelab-argocd` with the copy/fork.
 
 Details below show what steps are needed for creating a k3s cluster on an Ubuntu based system(s).
 <details>
@@ -83,7 +90,16 @@ curl https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
 # NODE
 ## packages for k3s/longhorn
 apt update
-apt install -y curl open-iscsi
+apt install -y curl open-iscsi nfs-common
+
+# workaround for multipath automounting Longhorn volumes
+## https://longhorn.io/kb/troubleshooting-volume-with-multipath/
+cat << 'EOF' >> /etc/multipath.conf
+blacklist {
+    devnode "^sd[a-z0-9]+"
+}
+EOF
+systemctl restart multipathd.service
 
 # workaround for cilium not loading packages, dependent upon OS
 ## https://github.com/cilium/cilium/issues/25021
@@ -97,15 +113,12 @@ EOF
 
 
 
-
-export SETUP_NODEIP=xxx
-export SETUP_CLUSTERTOKEN=xxx
-
-
+export SETUP_NODEIP=192.168.10.100
+export SETUP_CLUSTERTOKEN=chickennuggets20202020
 
 # CREATE MASTER NODE
-curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="v1.30.0+k3s1" INSTALL_K3S_EXEC="--node-ip $SETUP_NODEIP --disable=coredns,flannel,local-storage,metrics-server,servicelb,traefik --flannel-backend='none' --disable-network-policy --disable-cloud-controller --disable-kube-proxy" K3S_TOKEN=$SETUP_CLUSTERTOKEN K3S_KUBECONFIG_MODE=644 sh -s -
-kubectl taint nodes rpi5 node-role.kubernetes.io/control-plane:NoSchedule
+curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="v1.30.1+k3s1" INSTALL_K3S_EXEC="--node-ip $SETUP_NODEIP --disable=coredns,flannel,local-storage,metrics-server,servicelb,traefik --flannel-backend='none' --disable-network-policy --disable-cloud-controller --disable-kube-proxy" K3S_TOKEN=$SETUP_CLUSTERTOKEN K3S_KUBECONFIG_MODE=644 sh -s -
+kubectl taint nodes rk1-01 node-role.kubernetes.io/control-plane:NoSchedule
 
 
 # INSTALL CILIUM
@@ -134,7 +147,7 @@ echo "$coredns_values" | helm template $coredns_name $coredns_chart --repo $core
 # JOIN NODES TO CLUSTER
 curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="v1.30.0+k3s1" K3S_URL=https://$SETUP_NODEIP:6443 K3S_TOKEN=$SETUP_CLUSTERTOKEN sh -
 # LABEL NODES AS WORKERS
-kubectl label nodes rpi4 kubernetes.io/role=worker
+kubectl label nodes mynodename kubernetes.io/role=worker
 ```
 </details>
 
@@ -144,11 +157,11 @@ kubectl label nodes rpi4 kubernetes.io/role=worker
 ## https://developer.1password.com/docs/cli/get-started
 # login via `eval $(op signin)`
 
-export domain="$(op read op://homelab-proxmox/stringreplacesecret/domain)"
-export cloudflaretunnelid="$(op read op://homelab-proxmox/stringreplacesecret/cloudflaretunnelid)"
-export ciliumipamcidr="$(op read op://homelab-proxmox/stringreplacesecret/ciliumipamcidr)"
-export onepasswordconnect_json="$(op read op://homelab-proxmox/1passwordconnect/1password-credentials.json | base64)"
-export externalsecrets_token="$(op read op://homelab-proxmox/external-secrets/token)"
+export domain="$(op read op://homelab-proxmax/stringreplacesecret/domain)"
+export cloudflaretunnelid="$(op read op://homelab-proxmax/stringreplacesecret/cloudflaretunnelid)"
+export ciliumipamcidr="$(op read op://homelab-proxmax/stringreplacesecret/ciliumipamcidr)"
+export onepasswordconnect_json="$(op read op://homelab-proxmax/1passwordconnect/1password-credentials.json | base64)"
+export externalsecrets_token="$(op read op://homelab-proxmax/external-secrets/token)"
 
 kubectl create namespace argocd
 kubectl create secret generic stringreplacesecret --namespace argocd --from-literal domain=$domain --from-literal cloudflaretunnelid=$cloudflaretunnelid --from-literal ciliumipamcidr=$ciliumipamcidr
@@ -162,14 +175,14 @@ kubectl create secret generic 1passwordconnect --namespace external-secrets --fr
 
 ## argocd
 ```bash
-export argocd_applicationyaml=$(curl -sL "https://raw.githubusercontent.com/mitchross/argocd-homelab/main/manifest/argocd.yaml" | yq eval-all '. | select(.metadata.name == "argocd" and .kind == "Application")' -)
+export argocd_applicationyaml=$(curl -sL "https://raw.githubusercontent.com/mitchross/k8s-homelab-argocd/main/manifest/argocd.yaml" | yq eval-all '. | select(.metadata.name == "argocd" and .kind == "Application")' -)
 export argocd_name=$(echo "$argocd_applicationyaml" | yq eval '.metadata.name' -)
 export argocd_chart=$(echo "$argocd_applicationyaml" | yq eval '.spec.source.chart' -)
 export argocd_repo=$(echo "$argocd_applicationyaml" | yq eval '.spec.source.repoURL' -)
 export argocd_namespace=$(echo "$argocd_applicationyaml" | yq eval '.spec.destination.namespace' -)
 export argocd_version=$(echo "$argocd_applicationyaml" | yq eval '.spec.source.targetRevision' -)
 export argocd_values=$(echo "$argocd_applicationyaml" | yq eval '.spec.source.helm.valuesObject' - | yq eval 'del(.configs.cm)' -)
-export argocd_config=$(curl -sL "https://raw.githubusercontent.com/mitchross/argocd-homelab/main/manifest/argocd.yaml" | yq eval-all '. | select(.kind == "AppProject" or .kind == "ApplicationSet")' -)
+export argocd_config=$(curl -sL "https://raw.githubusercontent.com/mitchross/k8s-homelab-argocd/main/manifest/argocd.yaml" | yq eval-all '. | select(.kind == "AppProject" or .kind == "ApplicationSet")' -)
 
 # install
 echo "$argocd_values" | helm template $argocd_name $argocd_chart --repo $argocd_repo --version $argocd_version --namespace $argocd_namespace --values - | kubectl apply --namespace $argocd_namespace --filename -
@@ -177,11 +190,11 @@ echo "$argocd_values" | helm template $argocd_name $argocd_chart --repo $argocd_
 # configure
 echo "$argocd_config" | kubectl apply --filename -
 ```
-# Post Setup
-## Authentik Add Google Auth to Stage
+## Post Setup
+### Authentik Add Google Auth to Stage
 This is a manual step until either the default authentik resource can be imported or another stage we manage can be used.
 
-Follow: https://docs.goauthentik.io/integrations/sources/general
+Follow: https://docs.goauthentik.io/docs/sources
 
 This is what the terraform code would look like.
 ```hcl
@@ -191,3 +204,7 @@ resource "authentik_stage_identification" "default" {
   sources        = [authentik_source_oauth.google.uuid]
 }
 ```
+
+# Additional Comments
+* If doing find and replace, be sure to leave `https://github.com/mitchross/empty.git`.
+* Bootstrapping can be a very resource intensive process.  On a lower powered cluster, consider reducing the number of applications deployed and gradually adding them.

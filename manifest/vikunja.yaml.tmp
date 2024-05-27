@@ -231,7 +231,7 @@ metadata:
 spec:
   ingressClassName: ingress-nginx-internal
   rules:
-  - host: "tasks.vanillax.xyz"
+  - host: "tasks.vanillax.me"
     http:
       paths:
       - path: "/api"
