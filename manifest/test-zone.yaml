@@ -105,7 +105,7 @@ metadata:
 spec:
   ingressClassName: ingress-nginx-internal
   rules:
-    - host: echo-external2.<path:stringreplacesecret#domain>
+    - host: echo-external.<path:stringreplacesecret#domain>
       http:
         paths:
           - path: /
@@ -127,7 +127,7 @@ spec:
     namespace: gateway
     sectionName: https
   hostnames:
-  - "echo-external2.<path:stringreplacesecret#domain>"
+  - "echo-external.<path:stringreplacesecret#domain>"
   rules:
   - backendRefs:
     - name: echo-service
@@ -142,7 +142,7 @@ metadata:
     external-dns.custom/type: public
 spec:
   endpoints:
-    - dnsName: echo-external2.<path:stringreplacesecret#domain>
+    - dnsName: echo-external.<path:stringreplacesecret#domain>
       recordType: CNAME
       targets:
         # - extgw.<path:stringreplacesecret#domain>
