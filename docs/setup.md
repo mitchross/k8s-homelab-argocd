@@ -157,11 +157,11 @@ kubectl label nodes mynodename kubernetes.io/role=worker
 ## https://developer.1password.com/docs/cli/get-started
 # login via `eval $(op signin)`
 
-export domain="$(op read op://homelab-proxmox/stringreplacesecret/domain)"
-export cloudflaretunnelid="$(op read op://homelab-proxmox/stringreplacesecret/cloudflaretunnelid)"
-export ciliumipamcidr="$(op read op://homelab-proxmox/stringreplacesecret/ciliumipamcidr)"
-export onepasswordconnect_json="$(op read op://homelab-proxmox/1passwordconnect/1password-credentials.json | base64)"
-export externalsecrets_token="$(op read op://homelab-proxmox/external-secrets/token)"
+export domain="$(op read op://homelabproxmox/stringreplacesecret/domain)"
+export cloudflaretunnelid="$(op read op://homelabproxmox/stringreplacesecret/cloudflaretunnelid)"
+export ciliumipamcidr="$(op read op://homelabproxmox/stringreplacesecret/ciliumipamcidr)"
+export onepasswordconnect_json="$(op read op://homelabproxmox/1passwordconnect/1password-credentials.json | base64)"
+export externalsecrets_token="$(op read op://homelabproxmox/external-secrets/token)"
 
 kubectl create namespace argocd
 kubectl create secret generic stringreplacesecret --namespace argocd --from-literal domain=$domain --from-literal cloudflaretunnelid=$cloudflaretunnelid --from-literal ciliumipamcidr=$ciliumipamcidr
