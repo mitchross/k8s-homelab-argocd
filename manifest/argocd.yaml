@@ -88,7 +88,7 @@ spec:
               image: registry.access.redhat.com/ubi8:8.10-901.1716482497
               env:
                 - name: AVP_VERSION
-                  value: 1.18.0
+                  value: 1.17.0
               command: [sh, -c]
               args:
                 - >-
@@ -195,15 +195,15 @@ spec:
   data:
     - secretKey: domain
       remoteRef:
-        key: stringreplacesecret
+        key: stringreplacesecret-proxmox
         property: domain
     - secretKey: cloudflaretunnelid
       remoteRef:
-        key: stringreplacesecret
+        key: stringreplacesecret-proxmox
         property: cloudflaretunnelid
     - secretKey: ciliumipamcidr
       remoteRef:
-        key: stringreplacesecret
+        key: stringreplacesecret-proxmox
         property: ciliumipamcidr
 ---
 apiVersion: argoproj.io/v1alpha1

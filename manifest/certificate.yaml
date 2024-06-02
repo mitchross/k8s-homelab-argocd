@@ -67,10 +67,10 @@ spec:
     - match:
         secretKey: tls.crt
         remoteRef:
-          remoteKey: certificate.wildcard-production
+          remoteKey: certificate.wildcard-production-proxmox
           property: tls.crt
     - match:
         secretKey: tls.key
         remoteRef:
-          remoteKey: certificate.wildcard-production
+          remoteKey: certificate.wildcard-production-proxmox
           property: tls.key

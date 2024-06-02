@@ -19,11 +19,11 @@ spec:
   data:
     - secretKey: credentials.json
       remoteRef:
-        key: cloudflared
+        key: cloudflared-proxmox
         property: credentials.json
     - secretKey: TunnelID
       remoteRef:
-        key: cloudflared
+        key: cloudflared-proxmox
         property: TunnelID
 ---
 apiVersion: v1

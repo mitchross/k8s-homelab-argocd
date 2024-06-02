@@ -114,10 +114,10 @@ EOF
 
 
 export SETUP_NODEIP=192.168.10.100
-export SETUP_CLUSTERTOKEN=chickennuggets12345
+export SETUP_CLUSTERTOKEN=xxxxx
 
 # CREATE MASTER NODE
-curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="v1.30.1+k3s1" INSTALL_K3S_EXEC="--node-ip $SETUP_NODEIP --disable=coredns,flannel,local-storage,metrics-server,servicelb,traefik --flannel-backend='none' --disable-network-policy --disable-cloud-controller --disable-kube-proxy" K3S_TOKEN=$SETUP_CLUSTERTOKEN K3S_KUBECONFIG_MODE=644 sh -s -
+curl -sfL https://get.k3s.io | INSTALL_K3S_VERSION="v1.30.0+k3s1" INSTALL_K3S_EXEC="--node-ip $SETUP_NODEIP --disable=coredns,flannel,local-storage,metrics-server,servicelb,traefik --flannel-backend='none' --disable-network-policy --disable-cloud-controller --disable-kube-proxy" K3S_TOKEN=$SETUP_CLUSTERTOKEN K3S_KUBECONFIG_MODE=644 sh -s -
 kubectl taint nodes rk1-01 node-role.kubernetes.io/control-plane:NoSchedule
 
 
@@ -157,11 +157,11 @@ kubectl label nodes mynodename kubernetes.io/role=worker
 ## https://developer.1password.com/docs/cli/get-started
 # login via `eval $(op signin)`
 
-export domain="$(op read op://homelabproxmox/stringreplacesecret/domain)"
-export cloudflaretunnelid="$(op read op://homelabproxmox/stringreplacesecret/cloudflaretunnelid)"
-export ciliumipamcidr="$(op read op://homelabproxmox/stringreplacesecret/ciliumipamcidr)"
-export onepasswordconnect_json="$(op read op://homelabproxmox/1passwordconnect/1password-credentials.json | base64)"
-export externalsecrets_token="$(op read op://homelabproxmox/external-secrets/token)"
+export domain="$(op read op://homelab/stringreplacesecret-proxmox/domain)"
+export cloudflaretunnelid="$(op read op://homelab/stringreplacesecret-proxmox/cloudflaretunnelid)"
+export ciliumipamcidr="$(op read op://homelab/stringreplacesecret-proxmox/ciliumipamcidr)"
+export onepasswordconnect_json="$(op read op://homelab/1passwordconnect/1password-credentials.json | base64)"
+export externalsecrets_token="$(op read op://homelab/external-secrets-proxmox/token)"
 
 kubectl create namespace argocd
 kubectl create secret generic stringreplacesecret --namespace argocd --from-literal domain=$domain --from-literal cloudflaretunnelid=$cloudflaretunnelid --from-literal ciliumipamcidr=$ciliumipamcidr
