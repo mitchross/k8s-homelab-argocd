@@ -45,7 +45,7 @@ spec:
   data:
     - secretKey: token
       remoteRef:
-        key: cert-manager
+        key: cert-manager-proxmox
         property: token
 ---
 apiVersion: cert-manager.io/v1
