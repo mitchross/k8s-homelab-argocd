@@ -19,7 +19,7 @@ spec:
   data:
     - secretKey: cloudflare-api-key
       remoteRef:
-        key: external-dns
+        key: external-dns-proxmox
         property: token
 ---
 apiVersion: argoproj.io/v1alpha1
@@ -45,7 +45,7 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: external-dns-proxmox
-                key: token
+                key: cloudflare-api-key
         annotationFilter: "external-dns.custom/type in (public, private)"
 
   syncPolicy:
