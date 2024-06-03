@@ -21,11 +21,11 @@ spec:
   data:
     - secretKey: tls.crt
       remoteRef:
-        key: certificate.wildcard-production
+        key: certificate.wildcard-production-proxmox
         property: tls.crt
     - secretKey: tls.key
       remoteRef:
-        key: certificate.wildcard-production
+        key: certificate.wildcard-production-proxmox
         property: tls.key
 ---
 apiVersion: argoproj.io/v1alpha1
