@@ -85,7 +85,7 @@ spec:
             reloader.stakater.com/auto: "true"
           initContainers:
             - name: download-tools
-              image: registry.access.redhat.com/ubi8:8.10-901.1716482497
+              image: registry.access.redhat.com/ubi8:8.10-901.1716497712
               env:
                 - name: AVP_VERSION
                   value: 1.17.0
