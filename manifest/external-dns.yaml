@@ -45,7 +45,7 @@ spec:
             valueFrom:
               secretKeyRef:
                 name: external-dns-proxmox
-                key: cloudflare-api-key
+                key: token
         annotationFilter: "external-dns.custom/type in (public, private)"
 
   syncPolicy:
