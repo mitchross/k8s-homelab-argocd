@@ -29,7 +29,7 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: echo-service
+  name: echo
   namespace: test-zone
 spec:
   ports:
@@ -42,28 +42,26 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: echo-http
+  name: echo
   namespace: test-zone
-  annotations:
-    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
 spec:
   ingressClassName: ingress-nginx-internal
   rules:
-    - host: echo-internal.<path:stringreplacesecret#domain>
+    - host: echo.<path:stringreplacesecret#domain>
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: echo-service
+                name: echo
                 port:
                   number: 80
 ---
 apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
-  name: echo-route
+  name: echo
   namespace: test-zone
 spec:
   parentRefs:
@@ -71,22 +69,39 @@ spec:
     namespace: gateway
     sectionName: https
   hostnames:
-  - "echo-internal.<path:stringreplacesecret#domain>"
+  - "echo.<path:stringreplacesecret#domain>"
   rules:
   - backendRefs:
-    - name: echo-service
+    - name: echo
       port: 80
+      filters:
+      - requestHeaderModifier:
+          add:
+          - name: mytestheader1backend1
+            value: "setviahttproute"
+        type: RequestHeaderModifier
+    filters:
+    - type: URLRewrite
+      urlRewrite:
+        hostname: why.hello.there
+    - requestHeaderModifier:
+        set:
+        - name: mytestheader1all
+          value: "setviahttproute"
+        - name: mytestheader2all
+          value: "setviahttproute"
+      type: RequestHeaderModifier
 ---
 apiVersion: externaldns.k8s.io/v1alpha1
 kind: DNSEndpoint
 metadata:
-  name: echo-internal
+  name: echo
   namespace: test-zone
   annotations:
     external-dns.custom/type: private
 spec:
   endpoints:
-    - dnsName: echo-internal.<path:stringreplacesecret#domain>
+    - dnsName: echo.<path:stringreplacesecret#domain>
       recordType: CNAME
       targets:
         - intgw.<path:stringreplacesecret#domain>
@@ -94,60 +109,90 @@ spec:
         - name: external-dns.alpha.kubernetes.io/cloudflare-proxied
           value: "false"
 ---
-## External
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: httpbin
+  namespace: test-zone
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: httpbin
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: httpbin
+    spec:
+      containers:
+        - image: kong/httpbin
+          imagePullPolicy: Always
+          name: httpbin
+          ports:
+            - containerPort: 80
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: httpbin
+  namespace: test-zone
+spec:
+  ports:
+    - port: 80
+      targetPort: 80
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: httpbin
+---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: echo-http-external
+  name: httpbin
   namespace: test-zone
-  annotations:
-    nginx.ingress.kubernetes.io/backend-protocol: "HTTP"
 spec:
   ingressClassName: ingress-nginx-internal
   rules:
-    - host: echo-external.<path:stringreplacesecret#domain>
+    - host: httpbin.<path:stringreplacesecret#domain>
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: echo-service
+                name: httpbin
                 port:
                   number: 80
 ---
-apiVersion: gateway.networking.k8s.io/v1
+apiVersion: gateway.networking.k8s.io/v1beta1
 kind: HTTPRoute
 metadata:
-  name: echo-route-external
+  name: httpbin
   namespace: test-zone
 spec:
   parentRefs:
-  - name: external
+  - name: internal
     namespace: gateway
     sectionName: https
   hostnames:
-  - "echo-external.<path:stringreplacesecret#domain>"
+  - "httpbin.<path:stringreplacesecret#domain>"
   rules:
   - backendRefs:
-    - name: echo-service
+    - name: httpbin
       port: 80
 ---
 apiVersion: externaldns.k8s.io/v1alpha1
 kind: DNSEndpoint
 metadata:
-  name: echo-external
+  name: httpbin
   namespace: test-zone
   annotations:
-    external-dns.custom/type: public
+    external-dns.custom/type: private
 spec:
   endpoints:
-    - dnsName: echo-external.<path:stringreplacesecret#domain>
+    - dnsName: httpbin.<path:stringreplacesecret#domain>
       recordType: CNAME
       targets:
-        # - extgw.<path:stringreplacesecret#domain>
-          - ingress.<path:stringreplacesecret#domain>
-      # providerSpecific:
-      #   - name: external-dns.alpha.kubernetes.io/cloudflare-proxied
-      #     value: "false"
----
+        - intgw.<path:stringreplacesecret#domain>
+      providerSpecific:
+        - name: external-dns.alpha.kubernetes.io/cloudflare-proxied
+          value: "false"
