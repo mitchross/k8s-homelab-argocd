@@ -1,0 +1,43 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: speedtest
+  namespace: argocd
+spec:
+  destination:
+    namespace: test-zone
+    server: https://kubernetes.default.svc
+  project: homelab
+  source:
+    chart: app-template 
+    repoURL: http://bjw-s.github.io/helm-charts/
+    targetRevision: 1.5.1
+    helm:
+      releaseName: homepage
+      valuesObject:
+        image:
+          repository: ghcr.io/gethomepage/homepage
+          tag: v0.8.11
+        env:
+          TZ: America/New_York
+        service:
+          main:
+            ports:
+              http:
+                port: 3000
+        persistence:
+          config:
+            enabled: true
+            mountPath: /app/config
+            size: 1Gi
+        addons:
+          codeserver:
+             enabled: true
+             volumeMounts:
+               - name: config
+                 mountPath: /app/config
+  syncPolicy:
+    automated:
+      allowEmpty: true
+      prune: true
+      selfHeal: true
