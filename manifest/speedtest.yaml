@@ -22,8 +22,8 @@ spec:
       releaseName: speedtest
       valuesObject:
         image:
-          repository: docker.io/openspeedtest/latest
-          tag: 2.17.01
+          repository: openspeedtest
+          tag: latst
 
         service:
           main:
