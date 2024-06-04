@@ -47,7 +47,7 @@ spec:
           cloudflare:
             apiTokenSecretRef:
               name: external-dns
-              key: cloudflare_api_token
+              key: cloudflare-api-key
         sources:
           - service
           - ingress
