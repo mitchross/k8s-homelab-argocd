@@ -22,7 +22,7 @@ spec:
       releaseName: speedtest
       valuesObject:
         image:
-          repository: openspeedtest
+          repository: openspeedtest/latest
           tag: latst
 
         service:
