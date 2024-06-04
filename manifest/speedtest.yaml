@@ -22,7 +22,7 @@ spec:
       releaseName: speedtest
       valuesObject:
         image:
-          repository: openspeedtest/latest
+          repository: ghcr.io/truecharts/openspeedtest
           tag: latst
 
         service:
