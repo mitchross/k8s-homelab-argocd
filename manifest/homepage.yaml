@@ -46,7 +46,7 @@ spec:
     automated:
       allowEmpty: true
       prune: true
-      selfHeal: true
+      selfHeal: false
 ---
 apiVersion: v1
 kind: Service
