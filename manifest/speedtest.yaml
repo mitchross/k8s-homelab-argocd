@@ -1,4 +1,8 @@
-
+---
+kind: Namespace
+apiVersion: v1
+metadata:
+  name: test-zone
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: Application
@@ -11,36 +15,21 @@ spec:
     server: https://kubernetes.default.svc
   project: homelab
   source:
-    repoURL: https://bjw-s.github.io/helm-charts/
-    chart: openspeedtest
-    targetRevision: 1.2.0  # Specify the version of the chart you want to use
+    chart: app-template 
+    repoURL: http://bjw-s.github.io/helm-charts/
+    targetRevision: 1.5.1
     helm:
-      values: |
+      releaseName: speedtest
+      valuesObject:
+        image:
+          repository: docker.io/openspeedtest/latest
+          tag: 2.17.01
+
         service:
-          type: ClusterIP
-          port: 8080
-          service:
-            main:
-              ports:
-                http:
-                  port: 3000
-                  protocol: HTTP
-          ingress:
-            main:
-              enabled: true
-              className: nginx
-              annotations:
-                nginx.ingress.kubernetes.io/proxy-body-size: 50m
-                cert-manager.io/cluster-issuer: letsencrypt-prod
-              hosts:
-                - host: &host speedtest.vanillax.me
-                  paths:
-                    - path: /
-                      pathType: Prefix
-              tls:
-                - hosts:
-                    - *host
-                  secretName: speedtest-tls-certificate
+          main:
+            ports:
+              http:
+                port: 3000
   syncPolicy:
     automated:
       allowEmpty: true
