@@ -55,8 +55,8 @@ metadata:
   namespace: test-zone
 spec:
   ports:
-    - port: 80
-      targetPort: 80
+    - port: 3000
+      targetPort: 3000
       protocol: TCP
   selector:
     app.kubernetes.io/name: homepage
@@ -78,7 +78,7 @@ spec:
               service:
                 name: homepage
                 port:
-                  number: 80
+                  number: 3000
 ---
 apiVersion: gateway.networking.k8s.io/v1beta1
 kind: HTTPRoute
@@ -95,7 +95,7 @@ spec:
   rules:
   - backendRefs:
     - name: homepage
-      port: 80
+      port: 3000
 ---
 apiVersion: externaldns.k8s.io/v1alpha1
 kind: DNSEndpoint
