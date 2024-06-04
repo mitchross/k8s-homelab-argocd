@@ -1,7 +1,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: speedtest
+  name: homepage
   namespace: argocd
 spec:
   destination:
