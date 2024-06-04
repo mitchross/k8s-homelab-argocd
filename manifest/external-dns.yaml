@@ -53,7 +53,6 @@ spec:
           - ingress
           - crd
         annotationFilter: "external-dns.custom/type in (public, private)"
-
   syncPolicy:
     automated:
       allowEmpty: true
