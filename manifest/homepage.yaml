@@ -56,25 +56,25 @@ spec:
       protocol: TCP
   selector:
     app.kubernetes.io/name: homepage
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: homepage
-  namespace: test-zone
-spec:
-  ingressClassName: ingress-nginx-internal
-  rules:
-    - host: homepage.<path:stringreplacesecret#domain>
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: homepage
-                port:
-                  number: 3000
+# ---
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#   name: homepage
+#   namespace: test-zone
+# spec:
+#   ingressClassName: ingress-nginx-internal
+#   rules:
+#     - host: homepage.<path:stringreplacesecret#domain>
+#       http:
+#         paths:
+#           - path: /
+#             pathType: Prefix
+#             backend:
+#               service:
+#                 name: homepage
+#                 port:
+#                   number: 3000
 ---
 apiVersion: gateway.networking.k8s.io/v1beta1
 kind: HTTPRoute
