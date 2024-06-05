@@ -56,33 +56,36 @@ spec:
       protocol: TCP
   selector:
     app.kubernetes.io/name: homepage
-# ---
-# apiVersion: networking.k8s.io/v1
-# kind: Ingress
-# metadata:
-#   name: homepage
-#   namespace: test-zone
-# spec:
-#   ingressClassName: ingress-nginx-internal
-#   rules:
-#     - host: homepage.<path:stringreplacesecret#domain>
-#       http:
-#         paths:
-#           - path: /
-#             pathType: Prefix
-#             backend:
-#               service:
-#                 name: homepage
-#                 port:
-#                   number: 3000
 ---
-apiVersion: gateway.networking.k8s.io/v1beta1
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: homepage
+  namespace: test-zone
+spec:
+  ingressClassName: ingress-nginx-internal
+  rules:
+    - host: auth.<path:stringreplacesecret#domain>
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: homepage
+                port:
+                  number: 3000
+---
+apiVersion: gateway.networking.k8s.io/v1
 kind: HTTPRoute
 metadata:
   name: homepage
   namespace: test-zone
 spec:
   parentRefs:
+  - name: internal
+    namespace: gateway
+    sectionName: https
   - name: external
     namespace: gateway
     sectionName: https
@@ -91,21 +94,22 @@ spec:
   rules:
   - backendRefs:
     - name: homepage
-      port: 3000
+      port: 80
 ---
 apiVersion: externaldns.k8s.io/v1alpha1
 kind: DNSEndpoint
 metadata:
   name: homepage
-  namespace: test-zone
   annotations:
-    external-dns.custom/type: public
+    external-dns.custom/type: private
 spec:
   endpoints:
     - dnsName: homepage.<path:stringreplacesecret#domain>
       recordType: CNAME
       targets:
-        - extgw.<path:stringreplacesecret#domain>
-      providerSpecific:
-        - name: external-dns.alpha.kubernetes.io/cloudflare-proxied
-          value: "false"
+        - ingress.<path:stringreplacesecret#domain>
+      # targets:
+      #   - intgw.<path:stringreplacesecret#domain>
+      # providerSpecific:
+      #   - name: external-dns.alpha.kubernetes.io/cloudflare-proxied
+      #     value: "false"
