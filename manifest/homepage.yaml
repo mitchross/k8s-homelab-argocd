@@ -44,19 +44,19 @@ spec:
       prune: true
       selfHeal: false
 ---
-apiVersion: v1
-kind: Service
-metadata:
-  name: homepage
-  namespace: test-zone
-spec:
-  ports:
-    - port: 3000
-      targetPort: 3000
-      protocol: TCP
-  selector:
-    app.kubernetes.io/name: homepage
----
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   name: homepage
+#   namespace: test-zone
+# spec:
+#   ports:
+#     - port: 3000
+#       targetPort: 3000
+#       protocol: TCP
+#   selector:
+#     app.kubernetes.io/name: homepage
+# ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
@@ -65,7 +65,7 @@ metadata:
 spec:
   ingressClassName: ingress-nginx-internal
   rules:
-    - host: auth.<path:stringreplacesecret#domain>
+    - host: homepage.<path:stringreplacesecret#domain>
       http:
         paths:
           - path: /
