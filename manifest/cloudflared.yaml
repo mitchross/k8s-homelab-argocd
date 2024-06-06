@@ -124,7 +124,7 @@ spec:
     - dnsName: ingress.<path:stringreplacesecret#domain>
       recordType: CNAME
       targets:
-        - <path:stringreplacesecret#cloudflaretunnelid>.cfargotunnel.com
+        - test.cfargotunnel.com
       providerSpecific:
         - name: external-dns.alpha.kubernetes.io/cloudflare-proxied
           value: "true"
