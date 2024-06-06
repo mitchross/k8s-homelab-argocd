@@ -48,7 +48,7 @@ spec:
   rules:
   - backendRefs:
     - name: libreddit
-      port: 80
+      port: 8080
 
 ---
 apiVersion: externaldns.k8s.io/v1alpha1
