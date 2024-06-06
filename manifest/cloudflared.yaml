@@ -125,3 +125,6 @@ spec:
       recordType: CNAME
       targets:
         - <path:stringreplacesecret#cloudflaretunnelid>.cfargotunnel.com
+      providerSpecific:
+        - name: external-dns.alpha.kubernetes.io/cloudflare-proxied
+          value: "true"
