@@ -118,12 +118,10 @@ metadata:
   namespace: cloudflared
   annotations:
     external-dns.custom/type: public
+    external-dns.alpha.kubernetes.io/cloudflare-proxied: "true"
 spec:
   endpoints:
     - dnsName: ingress.<path:stringreplacesecret#domain>
       recordType: CNAME
       targets:
         - <path:stringreplacesecret#cloudflaretunnelid>.cfargotunnel.com
-      providerSpecific:
-        - name: external-dns.alpha.kubernetes.io/cloudflare-proxied
-          value: "true"
