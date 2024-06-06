@@ -46,7 +46,7 @@ metadata:
   namespace: test-zone
 spec:
   parentRefs:
-  - name: internal
+  - name: external
     namespace: gateway
     sectionName: https
   hostnames:
@@ -79,16 +79,16 @@ metadata:
   name: echo
   namespace: test-zone
   annotations:
-    external-dns.custom/type: private
+    external-dns.custom/type: public
 spec:
   endpoints:
     - dnsName: echo.<path:stringreplacesecret#domain>
       recordType: CNAME
       targets:
-        - intgw.<path:stringreplacesecret#domain>
+        - extgw.<path:stringreplacesecret#domain>
       providerSpecific:
         - name: external-dns.alpha.kubernetes.io/cloudflare-proxied
-          value: "false"
+          value: "true"
 ---
 apiVersion: apps/v1
 kind: Deployment
