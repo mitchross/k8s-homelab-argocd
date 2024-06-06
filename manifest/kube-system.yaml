@@ -99,18 +99,12 @@ spec:
         l2announcements:
           enabled: true
         loadBalancer:
-          algorithm: maglev
           mode: dsr
+          dsrDispatch: opt
+          acceleration: best-effort
+          l7:
+            backend: envoy
         localRedirectPolicy: true
-        image:
-          #testing https://github.com/cilium/cilium/issues/20942
-          override: "quay.io/cilium/cilium-ci:e14988e02ce8d0f3451b177a4f97a3833df65ab3"
-        operator:
-          #testing https://github.com/cilium/cilium/issues/20942
-          image:
-            override: "quay.io/cilium/operator-generic-ci:e14988e02ce8d0f3451b177a4f97a3833df65ab3"
-          replicas: 1
-          rollOutPods: true
         rollOutCiliumPods: true
         securityContext:
           privileged: true
