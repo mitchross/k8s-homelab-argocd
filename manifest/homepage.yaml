@@ -110,6 +110,6 @@ spec:
         - ingress.<path:stringreplacesecret#domain>
       # targets:
       #   - intgw.<path:stringreplacesecret#domain>
-      # providerSpecific:
-      #   - name: external-dns.alpha.kubernetes.io/cloudflare-proxied
-      #     value: "false"
+      providerSpecific:
+        - name: external-dns.alpha.kubernetes.io/cloudflare-proxied
+          value: "true"
