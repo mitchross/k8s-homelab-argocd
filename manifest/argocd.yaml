@@ -227,23 +227,23 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: homelab-manifest
+  name: bootstrap-apps
   namespace: argocd
 spec:
   goTemplate: true
   generators:
     - git:
-        repoURL: https://github.com/mitchross/k8s-homelab-argocd
+        repoURL: https://github.com/mitchross/k8s-homelab-argocd  # Your repo
         revision: HEAD
         files:
-          - path: manifest/*.yaml
+          - path: manifest/bootstrap/*.yaml
   template:
     metadata:
       name: '{{ normalize .path.filename }}'
     spec:
       project: homelab
       source:
-        repoURL: https://github.com/mitchross/k8s-homelab-argocd
+        repoURL: https://github.com/mitchross/k8s-homelab-argocd  # Your repo
         path: '{{ .path.path }}'
         plugin:
           name: avp-directory-include
@@ -253,7 +253,44 @@ spec:
         targetRevision: HEAD
       destination:
         server: "https://kubernetes.default.svc"
-        namespace: '{{ trimSuffix (ext ".yaml") (base .path.filename) }}'
+        namespace: '{{ .path.segments 1 }}'  # Extracts "bootstrap" 
+      syncPolicy:
+          - CreateNamespace=true
+      automated:
+          prune: true
+          selfHeal: true
+          allowEmpty: true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: app-deployments
+  namespace: argocd
+spec:
+  goTemplate: true
+  generators:
+    - git:
+        repoURL: https://github.com/mitchross/k8s-homelab-argocd
+        revision: HEAD
+        files:
+          - path: manifest/apps/*/*/*.yaml  # Matches the new structure
+  template:
+    metadata:
+      name: '{{ normalize .path.basename }}' # Use basename to get the application name
+    spec:
+      project: homelab
+      source:
+        repoURL: https://github.com/mitchross/k8s-homelab-argocd
+        path: '{{ .path.dirname }}'
+        plugin:
+          name: avp-directory-include
+          env:
+            - name: FILE_NAME
+              value: '{{ .path.filename }}'
+        targetRevision: HEAD
+      destination:
+        server: "https://kubernetes.default.svc"
+        namespace: '{{ .path.segments 1 }}'  # Extract namespace from path 
       syncPolicy:
         syncOptions:
           - CreateNamespace=true
