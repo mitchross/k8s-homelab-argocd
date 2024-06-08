@@ -236,7 +236,8 @@ spec:
         repoURL: https://github.com/mitchross/k8s-homelab-argocd.git
         revision: HEAD
         files:
-          - path: manifest/*/*/*.yaml  # Match namespace/app/yaml structure
+          - path: manifest/*/*.yaml  # Matches files in subdirectories 
+          - path: manifest/*.yaml    # Matches files directly in 'manifest' 
   template:
     metadata:
       name: '{{ normalize .path.basename }}'  # Use basename for app name
