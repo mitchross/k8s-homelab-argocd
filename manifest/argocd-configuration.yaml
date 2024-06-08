@@ -255,8 +255,9 @@ spec:
         server: "https://kubernetes.default.svc"
         namespace: '{{ .path.segments 1 }}'  # Extracts "bootstrap" 
       syncPolicy:
-          - CreateNamespace=true
-      automated:
+        syncOptions:
+          - CreateNamespace=true # Nested correctly here!
+        automated:
           prune: true
           selfHeal: true
           allowEmpty: true
