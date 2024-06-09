@@ -236,7 +236,7 @@ spec:
         repoURL: https://github.com/mitchross/k8s-homelab-argocd.git  # Update with your repo
         revision: HEAD
         files:
-          - path: manifest/*.yaml   # Matches files directly in 'manifests'
+          - path: manifest/*.yaml   # Matches files directly in 'manifest'
     - git: # For namespace-based applications
         repoURL: https://github.com/mitchross/k8s-homelab-argocd.git  # Update with your repo 
         revision: HEAD
