@@ -232,25 +232,19 @@ metadata:
 spec:
   goTemplate: true
   generators:
-    - git: # For root-level applications
-        repoURL: https://github.com/mitchross/k8s-homelab-argocd.git  # Update with your repo
+    - git:
+        repoURL: https://github.com/mitchross/k8s-homelab-argocd.git
         revision: HEAD
         files:
-          - path: manifest/*.yaml   # Matches files directly in 'manifests'
-    - git: # For namespace-based applications
-        repoURL: https://github.com/mitchross/k8s-homelab-argocd.git  # Update with your repo 
-        revision: HEAD
-        files:
-          - path: manifest/apps/*/*/*.yaml # Matches the nested structure
+          - path: manifest/*.yaml
   template:
     metadata:
-      name: '{{ if eq (len .path.segments) 1 }}{{ normalize .path.filename }}{{ else }}{{ normalize .path.basename }}{{ end }}'
-      # Explanation of name logic (see below)
+      name: '{{ normalize .path.filename }}'
     spec:
       project: homelab
       source:
-        repoURL: https://github.com/mitchross/k8s-homelab-argocd.git  # Update with your repo 
-        path: '{{ .path.dirname }}'
+        repoURL: https://github.com/mitchross/k8s-homelab-argocd.git
+        path: '{{ .path.path }}'
         plugin:
           name: avp-directory-include
           env:
@@ -259,8 +253,7 @@ spec:
         targetRevision: HEAD
       destination:
         server: "https://kubernetes.default.svc"
-        namespace: '{{ if eq (len .path.segments) 1 }}{{ trimSuffix (ext ".yaml") (base .path.filename)  }}{{ else }}{{ .path.segments 1 }}{{ end }}'
-        # Explanation of namespace logic (see below)
+        namespace: '{{ trimSuffix (ext ".yaml") (base .path.filename) }}'
       syncPolicy:
         syncOptions:
           - CreateNamespace=true
