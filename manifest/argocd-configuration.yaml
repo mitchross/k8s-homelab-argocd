@@ -227,61 +227,29 @@ spec:
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: bootstrap-apps
+  name: homelab-manifest
   namespace: argocd
 spec:
   goTemplate: true
   generators:
-    - git:
-        repoURL: https://github.com/mitchross/k8s-homelab-argocd  # Your repo
+    - git: # For root-level applications
+        repoURL: https://github.com/mitchross/k8s-homelab-argocd.git  # Update with your repo
         revision: HEAD
         files:
-          - path: manifest/bootstrap/*.yaml
+          - path: manifest/*.yaml   # Matches files directly in 'manifests'
+    - git: # For namespace-based applications
+        repoURL: https://github.com/mitchross/k8s-homelab-argocd.git  # Update with your repo 
+        revision: HEAD
+        files:
+          - path: manifest/apps/*/*/*.yaml # Matches the nested structure
   template:
     metadata:
-      name: '{{ normalize .path.filename }}'
+      name: '{{ if eq (len .path.segments) 1 }}{{ normalize .path.filename }}{{ else }}{{ normalize .path.basename }}{{ end }}'
+      # Explanation of name logic (see below)
     spec:
       project: homelab
       source:
-        repoURL: https://github.com/mitchross/k8s-homelab-argocd  # Your repo
-        path: '{{ .path.path }}'
-        plugin:
-          name: avp-directory-include
-          env:
-            - name: FILE_NAME
-              value: '{{ .path.filename }}'
-        targetRevision: HEAD
-      destination:
-        server: "https://kubernetes.default.svc"
-        namespace: '{{ .path.segments 1 }}'  # Extracts "bootstrap" 
-      syncPolicy:
-        syncOptions:
-          - CreateNamespace=true # Nested correctly here!
-        automated:
-          prune: true
-          selfHeal: true
-          allowEmpty: true
----
-apiVersion: argoproj.io/v1alpha1
-kind: ApplicationSet
-metadata:
-  name: app-deployments
-  namespace: argocd
-spec:
-  goTemplate: true
-  generators:
-    - git:
-        repoURL: https://github.com/mitchross/k8s-homelab-argocd
-        revision: HEAD
-        files:
-          - path: manifest/apps/*/*/*.yaml  # Matches the new structure
-  template:
-    metadata:
-      name: '{{ normalize .path.basename }}' # Use basename to get the application name
-    spec:
-      project: homelab
-      source:
-        repoURL: https://github.com/mitchross/k8s-homelab-argocd
+        repoURL: https://github.com/mitchross/k8s-homelab-argocd.git  # Update with your repo 
         path: '{{ .path.dirname }}'
         plugin:
           name: avp-directory-include
@@ -291,7 +259,8 @@ spec:
         targetRevision: HEAD
       destination:
         server: "https://kubernetes.default.svc"
-        namespace: '{{ .path.segments 1 }}'  # Extract namespace from path 
+        namespace: '{{ if eq (len .path.segments) 1 }}{{ trimSuffix (ext ".yaml") (base .path.filename)  }}{{ else }}{{ .path.segments 1 }}{{ end }}'
+        # Explanation of namespace logic (see below)
       syncPolicy:
         syncOptions:
           - CreateNamespace=true
