@@ -250,8 +250,8 @@ spec:
       project: homelab
       source:
         repoURL: https://github.com/mitchross/k8s-homelab-argocd.git  # Update with your repo 
-        path: '{{ .path.dirname }}'
-        plugin:
+        path: '{{ .path.dirname }}' # This is the key! 
+        plugin: # Add the plugin configuration to the template
           name: avp-directory-include
           env:
             - name: FILE_NAME
