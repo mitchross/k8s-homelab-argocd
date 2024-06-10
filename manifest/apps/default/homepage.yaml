@@ -86,9 +86,6 @@ spec:
   - name: internal
     namespace: gateway
     sectionName: https
-  - name: external
-    namespace: gateway
-    sectionName: https
   hostnames:
   - "homepage.<path:stringreplacesecret#domain>"
   rules:
@@ -100,6 +97,7 @@ apiVersion: externaldns.k8s.io/v1alpha1
 kind: DNSEndpoint
 metadata:
   name: homepage
+  namespace: homepage
   annotations:
     external-dns.custom/type: private
 spec:
@@ -107,9 +105,7 @@ spec:
     - dnsName: homepage.<path:stringreplacesecret#domain>
       recordType: CNAME
       targets:
-        - ingress.<path:stringreplacesecret#domain>
-      # targets:
-      #   - intgw.<path:stringreplacesecret#domain>
+        - intgw.<path:stringreplacesecret#domain>
       providerSpecific:
         - name: external-dns.alpha.kubernetes.io/cloudflare-proxied
-          value: "true"
+          value: "false"
