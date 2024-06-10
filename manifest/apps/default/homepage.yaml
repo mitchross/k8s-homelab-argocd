@@ -56,20 +56,6 @@ spec:
       protocol: TCP
   selector:
     app.kubernetes.io/name: homepage
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: homepage
-  namespace: test-zone
-spec:
-  ports:
-    - port: 3000
-      targetPort: 3000
-      protocol: TCP
-  selector:
-    app.kubernetes.io/name: httpbin
 ---
 apiVersion: gateway.networking.k8s.io/v1beta1
 kind: HTTPRoute
