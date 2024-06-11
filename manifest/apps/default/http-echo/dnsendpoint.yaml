@@ -1,0 +1,16 @@
+apiVersion: externaldns.k8s.io/v1alpha1
+kind: DNSEndpoint
+metadata:
+  name: echo
+  namespace: test-zone
+  annotations:
+    external-dns.custom/type: private
+spec:
+  endpoints:
+    - dnsName: echo.<path:stringreplacesecret#domain>
+      recordType: CNAME
+      targets:
+        - intgw.<path:stringreplacesecret#domain>
+      providerSpecific:
+        - name: external-dns.alpha.kubernetes.io/cloudflare-proxied
+          value: "false"
