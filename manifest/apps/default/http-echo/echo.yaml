@@ -1,0 +1,77 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: http-echo
+  namespace: argocd
+spec:
+  destination:
+    namespace: test-zone
+    server: https://kubernetes.default.svc
+  project: homelab
+  source:
+    chart: app-template
+    repoURL: https://bjw-s.github.io/helm-charts/
+    targetRevision: 3.2.1
+    helm:
+      releaseName: http-echo
+      valuesObject:
+        app-template:
+          controllers:
+            http-echo:
+              replicas: 1
+              containers:
+                http-echo:
+                  image:
+                    repository: mendhak/http-https-echo
+                    tag: 33
+                  securityContext:
+                    runAsUser: 1000
+                  resources:
+                    requests:
+                      cpu: 10m
+                      memory: 14Mi
+                    limits:
+                      cpu: 200m
+                      memory: 50Mi
+                  probes:
+                    liveness:
+                      enabled: true
+                    readiness:
+                      enabled: true
+                    startup:
+                      enabled: true
+                      spec:
+                        failureThreshold: 30
+                        periodSeconds: 5
+          defaultPodOptions:
+            topologySpreadConstraints:
+              - maxSkew: 1
+                topologyKey: kubernetes.io/hostname
+                whenUnsatisfiable: DoNotSchedule
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/instance: http-echo
+                    app.kubernetes.io/name: http-echo
+          service:
+            http-echo:
+              controller: http-echo
+              ports:
+                http:
+                  port: 8080
+          route:
+            main:
+              parentRefs:
+              - name: internal
+                namespace: gateway
+                sectionName: https
+              hostnames:
+              - "echo.<path:stringreplacesecret#domain>"
+              rules:
+              - backendRefs:
+                - name: http-echo
+                  port: 3000
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+      allowEmpty: true
