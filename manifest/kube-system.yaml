@@ -71,6 +71,7 @@ spec:
           socketPath: /var/run/k3s/containerd/containerd.sock
         endpointRoutes:
           enabled: true
+        enableCiliumEndpointSlice: true
         hubble:
           enabled: true
           metrics:
@@ -119,6 +120,10 @@ spec:
             name: certificate
           # gatewayClass:
           #   create: "true"
+        # Increase rate limit when doing L2 announcements
+        k8sClientRateLimit:
+            qps: 20
+            burst: 100
   syncPolicy:
     automated:
       allowEmpty: true
