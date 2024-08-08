@@ -25,12 +25,12 @@ spec:
             apiVersion: kustomize.config.k8s.io/v1beta1
             kind: Kustomization
             resources:
-              - https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.0.0/config/crd/standard/gateway.networking.k8s.io_gatewayclasses.yaml
-              - https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.0.0/config/crd/standard/gateway.networking.k8s.io_httproutes.yaml
-              - https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.0.0/config/crd/standard/gateway.networking.k8s.io_referencegrants.yaml
-              - https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.0.0/config/crd/experimental/gateway.networking.k8s.io_gateways.yaml
-              - https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.0.0/config/crd/experimental/gateway.networking.k8s.io_grpcroutes.yaml
-              - https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.0.0/config/crd/experimental/gateway.networking.k8s.io_tlsroutes.yaml
+              - https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.1.0/config/crd/standard/gateway.networking.k8s.io_gatewayclasses.yaml
+              - https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.1.0/config/crd/standard/gateway.networking.k8s.io_httproutes.yaml
+              - https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.1.0/config/crd/standard/gateway.networking.k8s.io_referencegrants.yaml
+              - https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.1.0/config/crd/experimental/gateway.networking.k8s.io_gateways.yaml
+              - https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.1.0/config/crd/experimental/gateway.networking.k8s.io_tlsroutes.yaml
+              - https://raw.githubusercontent.com/kubernetes-sigs/gateway-api/v1.1.0/config/crd/experimental/gateway.networking.k8s.io_grpcroutes.yaml
   syncPolicy:
     automated:
       allowEmpty: true
@@ -61,13 +61,14 @@ spec:
         bpf:
           masquerade: true
           hostLegacyRouting: true
+        envoy:
+          enabled: false
         cluster:
           name: home-cluster
           id: 1
         containerRuntime:
           integration: containerd
           socketPath: /var/run/k3s/containerd/containerd.sock
-        enableRuntimeDeviceDetection: true
         endpointRoutes:
           enabled: true
         hubble:
@@ -99,21 +100,25 @@ spec:
         l2announcements:
           enabled: true
         loadBalancer:
+          algorithm: maglev
           mode: dsr
-          dsrDispatch: opt
-          acceleration: best-effort
-          l7:
-            backend: envoy
         localRedirectPolicy: true
+        # testing https://github.com/cilium/cilium/issues/20942
+        operator:
+          replicas: 1
+          rollOutPods: true
         rollOutCiliumPods: true
         securityContext:
           privileged: true
         routingMode: native
         gatewayAPI:
           enabled: true
+          externalTrafficPolicy: Local
           secretsNamespace:
             create: false
             name: certificate
+          # gatewayClass:
+          #   create: "true"
   syncPolicy:
     automated:
       allowEmpty: true
@@ -159,7 +164,7 @@ spec:
   source:
     chart: coredns
     repoURL: https://coredns.github.io/helm
-    targetRevision: 1.31.0
+    targetRevision: 1.32.0
     helm:
       valuesObject:
         fullnameOverride: coredns
@@ -291,25 +296,25 @@ spec:
     - name: hubble-ui
       port: 80
 ---
-apiVersion: gateway.networking.k8s.io/v1alpha2
-kind: GRPCRoute
-metadata:
-  name: hubble
-  namespace: kube-system
-  annotations:
-    argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
-spec:
-  parentRefs:
-  - name: internal
-    namespace: gateway
-    sectionName: https
-  hostnames:
-  - "hubble.<path:stringreplacesecret#domain>"
-  rules:
-  - backendRefs:
-    - name: hubble-ui
-      port: 80
----
+# apiVersion: gateway.networking.k8s.io/v1
+# kind: GRPCRoute
+# metadata:
+#   name: hubble
+#   namespace: kube-system
+#   annotations:
+#     argocd.argoproj.io/sync-options: SkipDryRunOnMissingResource=true
+# spec:
+#   parentRefs:
+#   - name: internal
+#     namespace: gateway
+#     sectionName: https
+#   hostnames:
+#   - "hubble.<path:stringreplacesecret#domain>"
+#   rules:
+#   - backendRefs:
+#     - name: hubble-ui
+#       port: 80
+# ---
 apiVersion: externaldns.k8s.io/v1alpha1
 kind: DNSEndpoint
 metadata:
