@@ -17,7 +17,7 @@ spec:
   source:
     chart: app-template
     repoURL: https://bjw-s.github.io/helm-charts/
-    targetRevision: 3.2.1
+    targetRevision: 3.5.1
     helm:
       releaseName: http-echo
       valuesObject:
